@@ -1,2 +1,9 @@
-const serverMessage: string = "Hello, TypeScript with Node.js!";
-console.log(serverMessage);
+import { LinkedList } from "./linked-list";
+
+const list = new LinkedList();
+list.insertAtEnd("a");
+list.insertAtEnd("b");
+list.insertAtHead("z");
+console.log(list.toArray());
+list.deleteByValue("a");
+console.log(list.toArray());
