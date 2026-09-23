@@ -65,4 +65,17 @@ describe("RGA", () => {
 
     expect(list.toArray()).toEqual(["a", "b"]);
   });
+
+  it("should include deleted nodes when using toArrayWithDeleted", () => {
+    const list = new RgaList("client-a");
+
+    list.insertAtEnd("a");
+    const bId = list.insertAtEnd("b");
+    list.insertAtEnd("c");
+
+    list.deleteById(bId);
+
+    expect(list.toArray()).toEqual(["a", "c"]);
+    expect(list.toArrayWithDeleted()).toEqual(["a", "b", "c"]);
+  });
 });
