@@ -1,19 +1,21 @@
-import { Identity } from "./identity";
+import { compareIds, Identity } from "./identity";
 
-export class Node {
+export class RgaNode {
   readonly value: string;
-  next: Node | null;
+  next: RgaNode | null;
   readonly id: Identity;
+  deleted: boolean;
 
   constructor(value: string, id: Identity) {
     this.value = value;
     this.next = null;
     this.id = id;
+    this.deleted = false;
   }
 }
 
-export class LinkedList {
-  private head: Node | null = null;
+export class RgaList {
+  private head: RgaNode | null = null;
   private counter: number = 0;
   private clientId: string;
 
@@ -21,22 +23,37 @@ export class LinkedList {
     this.clientId = clientId;
   }
 
-  insertAtHead(value: string): void {
-    const newNode = new Node(value, { clientId: this.clientId, counter: this.counter });
+  private buildArray(includeDeleted: boolean): string[] {
+    const arr: string[] = [];
+    let current: RgaNode | null = this.head;
+
+    while (current) {
+      if (includeDeleted || !current.deleted) {
+        arr.push(current.value);
+      }
+      current = current.next;
+    }
+
+    return arr;
+  }
+
+  insertAtHead(value: string): Identity {
+    const newNode = new RgaNode(value, { clientId: this.clientId, counter: this.counter });
 
     newNode.next = this.head;
     this.head = newNode;
 
     this.counter += 1;
+    return newNode.id;
   }
 
-  insertAtEnd(value: string): void {
-    const newNode = new Node(value, { clientId: this.clientId, counter: this.counter });
+  insertAtEnd(value: string): Identity {
+    const newNode = new RgaNode(value, { clientId: this.clientId, counter: this.counter });
 
     if (!this.head) {
       this.head = newNode;
       this.counter += 1;
-      return;
+      return newNode.id;
     }
 
     let current = this.head;
@@ -46,44 +63,26 @@ export class LinkedList {
     current.next = newNode;
 
     this.counter += 1;
+    return newNode.id;
   }
 
-  deleteByValue(value: string): void {
-    if (!this.head) {
-      return;
-    }
+  deleteById(id: Identity): void {
+    let current: RgaNode | null = this.head;
 
-    if (this.head.value === value) {
-      this.head = this.head.next;
-      return;
-    }
-
-    let current: Node | null = this.head;
-    let prev: Node | null = null;
-
-    while (current !== null && current.value !== value) {
-      prev = current;
+    while (current !== null) {
+      if (compareIds(current.id, id) === 0) {
+        current.deleted = true;
+        return;
+      }
       current = current.next;
-    }
-
-    if (current !== null && prev !== null) {
-      prev.next = current.next;
     }
   }
 
   toArray(): string[] {
-    let arr: string[] = [];
+    return this.buildArray(false);
+  }
 
-    if (!this.head) {
-      return arr;
-    }
-
-    let current: Node | null = this.head;
-    while (current) {
-      arr.push(current.value);
-      current = current.next;
-    }
-
-    return arr;
+  toArrayWithDeleted(): string[] {
+    return this.buildArray(true);
   }
 }
