@@ -1,4 +1,3 @@
-// test/rga.test.ts
 import { RgaList } from "../src/rga";
 
 describe("RGA", () => {
@@ -77,5 +76,31 @@ describe("RGA", () => {
 
     expect(list.toArray()).toEqual(["a", "c"]);
     expect(list.toArrayWithDeleted()).toEqual(["a", "b", "c"]);
+  });
+
+  it("should insert after a node", () => {
+    const list = new RgaList("client-a");
+
+    const aId = list.insertAtEnd("a");
+    list.insertAtEnd("c");
+    expect(list.toArray()).toEqual(["a", "c"]);
+
+    list.insertAfter(aId, { clientId: "client-a", counter: 1 }, "b");
+    expect(list.toArray()).toEqual(["a", "b", "c"]);
+  });
+
+  it("should throw an error is id not found", () => {
+    const list = new RgaList("client-a");
+
+    list.insertAtEnd("a");
+    list.insertAtEnd("c");
+
+    expect(() =>
+      list.insertAfter(
+        { clientId: "client-a", counter: 50 },
+        { clientId: "client-a", counter: 100 },
+        "b",
+      ),
+    ).toThrow("Target ID node not found in RGA list.");
   });
 });
